@@ -1,2 +1,2 @@
 #!/bin/bash
-tall -l < iacta >> iacta
+cat ./iacta | tail -n 1 >> ./iacta
