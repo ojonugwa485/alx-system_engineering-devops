@@ -1,0 +1,2 @@
+#!/bin/bash
+tall -l < iacta >> iacta
