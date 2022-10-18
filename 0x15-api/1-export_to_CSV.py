@@ -1,46 +1,33 @@
 #!/usr/bin/python3
-'''Reads todo list from api for id passed'''
-
-import csv
+"""
+Using https://jsonplaceholder.typicode.com
+gathers data from API and exports it to CSV file
+Implemented using recursion
+"""
+import re
 import requests
 import sys
 
-base_url = 'https://jsonplaceholder.typicode.com/'
 
+API = "https://jsonplaceholder.typicode.com"
+"""REST API url"""
 
-def do_request():
-    '''Performs request'''
-
-    if not len(sys.argv):
-        return print('USAGE:', __file__, '<employee id>')
-    eid = sys.argv[1]
-    try:
-        _eid = int(sys.argv[1])
-    except ValueError:
-        return print('Employee id must be an integer')
-
-    response = requests.get(base_url + 'users/' + eid)
-    if response.status_code == 404:
-        return print('User id not found')
-    elif response.status_code != 200:
-        return print('Error: status_code:', response.status_code)
-    user = response.json()
-
-    response = requests.get(base_url + 'todos/')
-    if response.status_code != 200:
-        return print('Error: status_code:', response.status_code)
-    todos = response.json()
-    user_todos = [todo for todo in todos
-                  if todo.get('userId') == user.get('id')]
-    completed = [todo for todo in user_todos if todo.get('completed')]
-
-    with open(eid + '.csv', 'w') as csvfile:
-        writer = csv.writer(csvfile, lineterminator='\n',
-                            quoting=csv.QUOTE_ALL)
-        [writer.writerow(['{}'.format(field) for field in
-                          (todo.get('userId'), user.get('username'),
-                           todo.get('completed'), todo.get('title'))])
-         for todo in user_todos]
 
 if __name__ == '__main__':
-    do_request()
+    if len(sys.argv) > 1:
+        if re.fullmatch(r'\d+', sys.argv[1]):
+            id = int(sys.argv[1])
+            user_res = requests.get('{}/users/{}'.format(API, id)).json()
+            todos_res = requests.get('{}/todos'.format(API)).json()
+            user_name = user_res.get('username')
+            todos = list(filter(lambda x: x.get('userId') == id, todos_res))
+            with open('{}.csv'.format(id), 'w') as file:
+                for todo in todos:
+                    file.write(
+                        '"{}","{}","{}","{}"\n'.format(
+                            id,
+                            user_name,
+                            todo.get('completed'),
+                            todo.get('title')
+                        )
+                    )
