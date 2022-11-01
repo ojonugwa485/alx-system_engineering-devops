@@ -40,8 +40,13 @@ def print_results(word_list, hot_list):
             count[word] = count[word] +\
              len(re.findall(r'(?:^| ){}(?:$| )'.format(word), title, re.I))
 
-    count = {k: v for k, v in count.items() if v > 0}
-    words = sorted(list(count.keys()))
-    for word in sorted(words,
-                       reverse=True, key=lambda k: count[k]):
-        print("{}: {}".format(word, count[word]))
+def count_words(subreddit, word_list):
+    """parses the title of all hot articles, and prints a sorted count of given
+    keywords (case-insensitive, delimited by spaces) """
+    global after
+    global count_dic
+    headers = {'User-Agent': 'xica369'}
+    url = "https://www.reddit.com/r/{}/hot.json".format(subreddit)
+    parameters = {'after': after}
+    response = requests.get(url, headers=headers, allow_redirects=False,
+                            params=parameters)
